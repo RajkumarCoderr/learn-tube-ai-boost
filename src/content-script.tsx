@@ -25,9 +25,6 @@ window.addEventListener('load', () => {
   }, 1000);
 });
 
-// We also want to detect navigation between YouTube videos (SPA behavior)
-// Using the mutation observer from youtubeDetector.ts
-
 // Add listener for YouTube video changes from background script
 if (typeof chrome !== 'undefined' && chrome.runtime) {
   chrome.runtime.onMessage.addListener((message) => {
