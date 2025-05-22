@@ -46,7 +46,6 @@ export default defineConfig(({ mode }) => ({
                  chunk.name === 'content' ? 'content-script.js' :
                  'assets/[name]-[hash].js';
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
       }
     },
   }
