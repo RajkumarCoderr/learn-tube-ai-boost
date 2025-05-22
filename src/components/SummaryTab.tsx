@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TimeStamp } from '@/types';
 import { generateSummary } from '@/services/apiService';
+import { seekToTime } from '@/services/youtubeDetector';
 import { DownloadCloud, ExternalLink, Eye } from 'lucide-react';
 import { ExportDialog } from './ExportDialog';
 
@@ -31,11 +31,7 @@ export const SummaryTab = () => {
 
   const handleTimestampClick = (seconds: number) => {
     // Navigate to specific timestamp in YouTube player
-    const videoPlayer = document.querySelector('video');
-    if (videoPlayer) {
-      videoPlayer.currentTime = seconds;
-      videoPlayer.play();
-    }
+    seekToTime(seconds);
   };
 
   const toggleFocusMode = () => {

@@ -10,8 +10,8 @@ export const getCurrentVideoId = (): string | null => {
 };
 
 export const getCurrentVideoTitle = (): string | null => {
-  // Try to get the video title from YouTube's page
-  const titleElement = document.querySelector('h1.title.ytd-video-primary-info-renderer');
+  // YouTube's DOM structure - find the video title
+  const titleElement = document.querySelector('h1.title.ytd-video-primary-info-renderer, h1.title');
   if (titleElement) {
     return titleElement.textContent?.trim() || null;
   }
@@ -20,7 +20,7 @@ export const getCurrentVideoTitle = (): string | null => {
 
 export const getCurrentChannel = (): string | null => {
   // Try to get the channel name
-  const channelElement = document.querySelector('#owner-name a');
+  const channelElement = document.querySelector('#owner-name a, #channel-name a');
   if (channelElement) {
     return channelElement.textContent?.trim() || null;
   }
@@ -28,25 +28,42 @@ export const getCurrentChannel = (): string | null => {
 };
 
 export const setupMutationObserver = (callback: (videoId: string | null) => void): MutationObserver => {
-  // This observer will detect when YouTube's SPA navigation changes pages
+  // This observer detects when YouTube's SPA navigation changes pages
   // It's needed because YouTube doesn't fully reload the page when navigating between videos
   
-  const observer = new MutationObserver(() => {
-    if (isYouTubeVideo()) {
-      const videoId = getCurrentVideoId();
-      callback(videoId);
-    } else {
-      callback(null);
+  const observer = new MutationObserver((mutations) => {
+    // Check if the URL has changed
+    if (window.location.href !== observer.lastUrl) {
+      observer.lastUrl = window.location.href;
+      
+      if (isYouTubeVideo()) {
+        const videoId = getCurrentVideoId();
+        callback(videoId);
+      } else {
+        callback(null);
+      }
     }
   });
   
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
+  // Save the current URL for comparison
+  observer.lastUrl = window.location.href;
+  
+  // Observe the document for title changes, which often happen on navigation
+  observer.observe(document.querySelector('title')!, {
+    subtree: true,
+    characterData: true,
+    childList: true
   });
   
   return observer;
 };
+
+// Extension to the MutationObserver interface for our custom property
+declare global {
+  interface MutationObserver {
+    lastUrl?: string;
+  }
+}
 
 // Function to get the YouTube player element
 export const getYouTubePlayer = (): HTMLElement | null => {
@@ -56,8 +73,36 @@ export const getYouTubePlayer = (): HTMLElement | null => {
 // Function to seek to specific time in video
 export const seekToTime = (seconds: number): void => {
   const player = getYouTubePlayer();
-  if (player && player.hasOwnProperty('seekTo')) {
+  if (player && typeof player.seekTo === 'function') {
     // @ts-ignore - YouTube player API
     player.seekTo(seconds);
+  } else if (document.querySelector('video')) {
+    // Fallback - try to seek the HTML5 video directly
+    const videoElement = document.querySelector('video');
+    if (videoElement) {
+      videoElement.currentTime = seconds;
+    }
   }
 };
+
+// Apply focus mode to the page
+export const applyFocusMode = (enable: boolean): void => {
+  if (enable) {
+    document.body.classList.add('youtube-focus-mode');
+  } else {
+    document.body.classList.remove('youtube-focus-mode');
+  }
+};
+
+// Listen for messages from the background script
+chrome.runtime.onMessage?.addListener((message) => {
+  if (message.type === 'NEW_VIDEO') {
+    // Dispatch a custom event that our app can listen for
+    window.dispatchEvent(
+      new CustomEvent('youtube-video-changed', { 
+        detail: { videoId: message.videoId }
+      })
+    );
+  }
+  return true;
+});

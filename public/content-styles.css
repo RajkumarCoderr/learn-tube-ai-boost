@@ -1,0 +1,26 @@
+
+#youtube-learner-extension-root {
+  position: absolute;
+  z-index: 9000;
+  top: 0;
+  right: 0;
+}
+
+/* Focus mode styles */
+body.youtube-focus-mode #secondary,
+body.youtube-focus-mode #comments,
+body.youtube-focus-mode #related,
+body.youtube-focus-mode ytd-watch-next-secondary-results-renderer,
+body.youtube-focus-mode #below {
+  display: none !important;
+}
+
+body.youtube-focus-mode #primary {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make the player take up more space in focus mode */
+body.youtube-focus-mode .html5-video-player {
+  max-height: 80vh !important;
+}
