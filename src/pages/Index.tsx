@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { AppProvider, useApp } from '@/contexts/AppContext';
 import { isYouTubeVideo, getCurrentVideoId, setupMutationObserver } from '@/services/youtubeDetector';
+import { Youtube } from 'lucide-react';
 
 const ExtensionContent = () => {
   const { setCurrentVideoId } = useApp();
@@ -44,7 +45,7 @@ const ExtensionContent = () => {
 
   // For the demo in Lovable, we'll show even if not on YouTube
   // In a real extension, you would check isYouTube here
-  const shouldShowExtension = true; // isYouTube for real extension
+  const shouldShowExtension = isYouTube || process.env.NODE_ENV === 'development';
 
   if (!shouldShowExtension) {
     return (
@@ -60,12 +61,22 @@ const ExtensionContent = () => {
   }
 
   return (
-    <div 
-      id="youtube-learner-extension"
-      className={`${isVisible ? '' : 'youtube-learner-hidden'}`}
-    >
-      <Layout />
-    </div>
+    <>
+      {!isVisible && (
+        <button 
+          onClick={toggleVisibility}
+          className="fixed top-4 right-0 z-[10000] bg-primary text-white p-2 rounded-l-lg shadow-lg"
+        >
+          <Youtube size={24} />
+        </button>
+      )}
+      <div 
+        id="youtube-learner-extension"
+        className={`fixed top-0 right-0 bottom-0 w-96 z-[9999] shadow-lg transition-transform duration-300 ease-in-out ${isVisible ? '' : 'translate-x-full'}`}
+      >
+        <Layout />
+      </div>
+    </>
   );
 };
 
