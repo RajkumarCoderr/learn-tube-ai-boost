@@ -12,7 +12,7 @@ const manifest = {
   manifest_version: 3,
   background: {
     service_worker: "src/background.ts",
-    type: "module"
+    type: "module" as const  // Using 'as const' to ensure it's treated as a literal type
   }
 };
 
