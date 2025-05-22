@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+console.log('YouTube Learner content script loaded');
+
 // Function to inject our React app into YouTube
 function injectApp() {
   // Create a container for our app
@@ -24,4 +26,14 @@ window.addEventListener('load', () => {
 });
 
 // We also want to detect navigation between YouTube videos (SPA behavior)
-// We'll use the YouTube detector service to handle that
+// Using the mutation observer from youtubeDetector.ts
+
+// Add listener for YouTube video changes from background script
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'NEW_VIDEO') {
+      console.log('New YouTube video detected:', message.videoId);
+    }
+    return true;
+  });
+}
