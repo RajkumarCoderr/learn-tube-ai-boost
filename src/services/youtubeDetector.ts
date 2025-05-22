@@ -73,9 +73,19 @@ export const getYouTubePlayer = (): HTMLElement | null => {
 // Function to seek to specific time in video
 export const seekToTime = (seconds: number): void => {
   const player = getYouTubePlayer();
-  if (player && typeof player.seekTo === 'function') {
-    // @ts-ignore - YouTube player API
-    player.seekTo(seconds);
+  if (player) {
+    // Use bracket notation to access the seekTo method since it's not in the HTMLElement type
+    // but it exists on YouTube's player element
+    try {
+      (player as any).seekTo(seconds);
+    } catch (error) {
+      console.error('Failed to seek using player API:', error);
+      // Fallback - try to seek the HTML5 video directly
+      const videoElement = document.querySelector('video');
+      if (videoElement) {
+        videoElement.currentTime = seconds;
+      }
+    }
   } else if (document.querySelector('video')) {
     // Fallback - try to seek the HTML5 video directly
     const videoElement = document.querySelector('video');
@@ -95,14 +105,16 @@ export const applyFocusMode = (enable: boolean): void => {
 };
 
 // Listen for messages from the background script
-chrome.runtime.onMessage?.addListener((message) => {
-  if (message.type === 'NEW_VIDEO') {
-    // Dispatch a custom event that our app can listen for
-    window.dispatchEvent(
-      new CustomEvent('youtube-video-changed', { 
-        detail: { videoId: message.videoId }
-      })
-    );
-  }
-  return true;
-});
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'NEW_VIDEO') {
+      // Dispatch a custom event that our app can listen for
+      window.dispatchEvent(
+        new CustomEvent('youtube-video-changed', { 
+          detail: { videoId: message.videoId }
+        })
+      );
+    }
+    return true;
+  });
+}
