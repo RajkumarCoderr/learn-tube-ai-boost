@@ -18,3 +18,5 @@ if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.onUpdated) {
     }
   });
 }
+
+export {}; // Adding this to make TypeScript treat this as a module

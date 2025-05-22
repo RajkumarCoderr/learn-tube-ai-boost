@@ -16,13 +16,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' &&
     componentTagger(),
-    crx({ manifest: {
-      ...manifest,
-      background: {
-        ...manifest.background,
-        type: "module" // Ensure this is specifically "module" not a variable string
-      }
-    } }),
+    crx({ manifest }),
   ].filter(Boolean),
   resolve: {
     alias: {
