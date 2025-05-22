@@ -6,13 +6,13 @@ import { componentTagger } from "lovable-tagger";
 import { crx } from "@crxjs/vite-plugin";
 import manifestJson from './public/manifest.json';
 
-// Create a properly typed manifest object that conforms to ManifestV3 type requirements
+// Ensure the manifest is correctly typed for CRXJS
 const manifest = {
   ...manifestJson,
-  // Ensure background.type is explicitly the string literal "module"
+  manifest_version: 3,
   background: {
-    ...manifestJson.background,
-    type: "module" as const
+    service_worker: "src/background.ts",
+    type: "module"
   }
 };
 
